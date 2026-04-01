@@ -6,7 +6,7 @@ export async function getEmpreendimentos() {
   const supabase = await createClient()
 
   const { data, error } = await supabase
-    .from('empreendimentos')
+    .from('vi_empreendimentos')
     .select('*, enrichment_data(*)')
     .eq('status', 'ativo')
     .order('score', { ascending: false })
@@ -19,7 +19,7 @@ export async function getEmpreendimentoBySlug(slug: string) {
   const supabase = await createClient()
 
   const { data } = await supabase
-    .from('empreendimentos')
+    .from('vi_empreendimentos')
     .select('*, enrichment_data(*)')
     .eq('slug', slug)
     .single()
@@ -31,7 +31,7 @@ export async function getEmpreendimentoById(id: number) {
   const supabase = await createClient()
 
   const { data } = await supabase
-    .from('empreendimentos')
+    .from('vi_empreendimentos')
     .select('*, enrichment_data(*), scores_history(*)')
     .eq('id', id)
     .single()

@@ -14,7 +14,7 @@ export async function getProfile() {
   if (!user) return null
 
   const { data: profile } = await supabase
-    .from('profiles')
+    .from('vi_profiles')
     .select('*')
     .eq('id', user.id)
     .single()

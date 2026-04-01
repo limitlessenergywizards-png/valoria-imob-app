@@ -1,12 +1,13 @@
 -- ValorIA - Initial Schema Migration
 -- Run this in the Supabase SQL Editor
+-- Prefix: vi_ (valoria-imob) for multi-project schema
 
 -- ============================================
 -- 1. TABLES
 -- ============================================
 
 -- Profiles (extends auth.users)
-CREATE TABLE IF NOT EXISTS public.profiles (
+CREATE TABLE IF NOT EXISTS public.vi_profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT,
   phone TEXT,
@@ -28,8 +29,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 );
 
 -- Empreendimentos
-CREATE TABLE IF NOT EXISTS public.empreendimentos (
-  id BIGSERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS public.vi_empreendimentos (
+  id bigint generated always as identity primary key,
   nome TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   endereco TEXT NOT NULL,
@@ -70,9 +71,9 @@ CREATE TABLE IF NOT EXISTS public.empreendimentos (
 );
 
 -- Enrichment Data
-CREATE TABLE IF NOT EXISTS public.enrichment_data (
-  id BIGSERIAL PRIMARY KEY,
-  empreendimento_id BIGINT NOT NULL REFERENCES public.empreendimentos(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.vi_enrichment_data (
+  id bigint generated always as identity primary key,
+  empreendimento_id BIGINT NOT NULL REFERENCES public.vi_empreendimentos(id) ON DELETE CASCADE,
   escolas_1km INTEGER DEFAULT 0,
   hospitais_1km INTEGER DEFAULT 0,
   supermercados_1km INTEGER DEFAULT 0,
@@ -95,9 +96,9 @@ CREATE TABLE IF NOT EXISTS public.enrichment_data (
 );
 
 -- Portfolio Imóveis
-CREATE TABLE IF NOT EXISTS public.portfolio_imoveis (
-  id BIGSERIAL PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.vi_portfolio_imoveis (
+  id bigint generated always as identity primary key,
+  user_id UUID NOT NULL REFERENCES public.vi_profiles(id) ON DELETE CASCADE,
   nome TEXT NOT NULL,
   slug TEXT,
   endereco TEXT NOT NULL,
@@ -132,9 +133,9 @@ CREATE TABLE IF NOT EXISTS public.portfolio_imoveis (
 );
 
 -- Portfolio Histórico de Valores
-CREATE TABLE IF NOT EXISTS public.portfolio_historico_valores (
-  id BIGSERIAL PRIMARY KEY,
-  imovel_id BIGINT NOT NULL REFERENCES public.portfolio_imoveis(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.vi_portfolio_historico_valores (
+  id bigint generated always as identity primary key,
+  imovel_id BIGINT NOT NULL REFERENCES public.vi_portfolio_imoveis(id) ON DELETE CASCADE,
   valor_estimado NUMERIC NOT NULL,
   preco_m2 NUMERIC,
   preco_medio_bairro NUMERIC,
@@ -145,9 +146,9 @@ CREATE TABLE IF NOT EXISTS public.portfolio_historico_valores (
 );
 
 -- Portfolio Transações
-CREATE TABLE IF NOT EXISTS public.portfolio_transacoes (
-  id BIGSERIAL PRIMARY KEY,
-  imovel_id BIGINT NOT NULL REFERENCES public.portfolio_imoveis(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.vi_portfolio_transacoes (
+  id bigint generated always as identity primary key,
+  imovel_id BIGINT NOT NULL REFERENCES public.vi_portfolio_imoveis(id) ON DELETE CASCADE,
   tipo TEXT NOT NULL CHECK (tipo IN ('compra', 'venda', 'aluguel_recebido', 'condominio', 'iptu', 'manutencao', 'seguro', 'outros')),
   valor NUMERIC NOT NULL,
   data_transacao DATE NOT NULL,
@@ -158,8 +159,8 @@ CREATE TABLE IF NOT EXISTS public.portfolio_transacoes (
 );
 
 -- Bairros Analytics
-CREATE TABLE IF NOT EXISTS public.bairros_analytics (
-  id BIGSERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS public.vi_bairros_analytics (
+  id bigint generated always as identity primary key,
   bairro TEXT NOT NULL,
   cidade TEXT NOT NULL DEFAULT 'Fortaleza',
   preco_medio_m2 NUMERIC,
@@ -180,10 +181,10 @@ CREATE TABLE IF NOT EXISTS public.bairros_analytics (
 );
 
 -- Watchlist
-CREATE TABLE IF NOT EXISTS public.watchlist (
-  id BIGSERIAL PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  empreendimento_id BIGINT NOT NULL REFERENCES public.empreendimentos(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.vi_watchlist (
+  id bigint generated always as identity primary key,
+  user_id UUID NOT NULL REFERENCES public.vi_profiles(id) ON DELETE CASCADE,
+  empreendimento_id BIGINT NOT NULL REFERENCES public.vi_empreendimentos(id) ON DELETE CASCADE,
   alert_price_drop BOOLEAN NOT NULL DEFAULT true,
   alert_score_change BOOLEAN NOT NULL DEFAULT true,
   alert_threshold INTEGER DEFAULT 5,
@@ -194,9 +195,9 @@ CREATE TABLE IF NOT EXISTS public.watchlist (
 );
 
 -- Notifications
-CREATE TABLE IF NOT EXISTS public.notifications (
-  id BIGSERIAL PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.vi_notifications (
+  id bigint generated always as identity primary key,
+  user_id UUID NOT NULL REFERENCES public.vi_profiles(id) ON DELETE CASCADE,
   type TEXT NOT NULL,
   title TEXT NOT NULL,
   message TEXT NOT NULL,
@@ -210,9 +211,9 @@ CREATE TABLE IF NOT EXISTS public.notifications (
 );
 
 -- Subscriptions
-CREATE TABLE IF NOT EXISTS public.subscriptions (
-  id BIGSERIAL PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.vi_subscriptions (
+  id bigint generated always as identity primary key,
+  user_id UUID NOT NULL REFERENCES public.vi_profiles(id) ON DELETE CASCADE,
   stripe_subscription_id TEXT,
   stripe_invoice_id TEXT,
   plan TEXT NOT NULL,
@@ -230,9 +231,9 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
 );
 
 -- Scores History
-CREATE TABLE IF NOT EXISTS public.scores_history (
-  id BIGSERIAL PRIMARY KEY,
-  empreendimento_id BIGINT NOT NULL REFERENCES public.empreendimentos(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.vi_scores_history (
+  id bigint generated always as identity primary key,
+  empreendimento_id BIGINT NOT NULL REFERENCES public.vi_empreendimentos(id) ON DELETE CASCADE,
   score INTEGER NOT NULL,
   score_anterior INTEGER,
   score_delta INTEGER,
@@ -245,13 +246,13 @@ CREATE TABLE IF NOT EXISTS public.scores_history (
 );
 
 -- Analytics
-CREATE TABLE IF NOT EXISTS public.analytics (
-  id BIGSERIAL PRIMARY KEY,
-  user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+CREATE TABLE IF NOT EXISTS public.vi_analytics (
+  id bigint generated always as identity primary key,
+  user_id UUID REFERENCES public.vi_profiles(id) ON DELETE SET NULL,
   session_id UUID,
   event_type TEXT NOT NULL,
   page_path TEXT,
-  empreendimento_id BIGINT REFERENCES public.empreendimentos(id) ON DELETE SET NULL,
+  empreendimento_id BIGINT REFERENCES public.vi_empreendimentos(id) ON DELETE SET NULL,
   event_data JSONB,
   user_agent TEXT,
   ip_address INET,
@@ -264,61 +265,62 @@ CREATE TABLE IF NOT EXISTS public.analytics (
 -- ============================================
 
 -- Empreendimentos
-CREATE INDEX idx_empreendimentos_status ON public.empreendimentos(status);
-CREATE INDEX idx_empreendimentos_bairro ON public.empreendimentos(bairro);
-CREATE INDEX idx_empreendimentos_score ON public.empreendimentos(score DESC);
-CREATE INDEX idx_empreendimentos_slug ON public.empreendimentos(slug);
-CREATE INDEX idx_empreendimentos_construtora ON public.empreendimentos(construtora);
-CREATE INDEX idx_empreendimentos_preco ON public.empreendimentos(preco);
-CREATE INDEX idx_empreendimentos_status_score ON public.empreendimentos(status, score DESC);
+CREATE INDEX idx_vi_empreendimentos_status ON public.vi_empreendimentos(status);
+CREATE INDEX idx_vi_empreendimentos_bairro ON public.vi_empreendimentos(bairro);
+CREATE INDEX idx_vi_empreendimentos_score ON public.vi_empreendimentos(score DESC);
+CREATE INDEX idx_vi_empreendimentos_slug ON public.vi_empreendimentos(slug);
+CREATE INDEX idx_vi_empreendimentos_construtora ON public.vi_empreendimentos(construtora);
+CREATE INDEX idx_vi_empreendimentos_preco ON public.vi_empreendimentos(preco);
+CREATE INDEX idx_vi_empreendimentos_status_score ON public.vi_empreendimentos(status, score DESC);
 
 -- Enrichment
-CREATE INDEX idx_enrichment_empreendimento ON public.enrichment_data(empreendimento_id);
+CREATE INDEX idx_vi_enrichment_empreendimento ON public.vi_enrichment_data(empreendimento_id);
 
 -- Portfolio
-CREATE INDEX idx_portfolio_user ON public.portfolio_imoveis(user_id);
-CREATE INDEX idx_portfolio_historico_imovel ON public.portfolio_historico_valores(imovel_id);
-CREATE INDEX idx_portfolio_historico_data ON public.portfolio_historico_valores(data_referencia);
-CREATE INDEX idx_portfolio_transacoes_imovel ON public.portfolio_transacoes(imovel_id);
-CREATE INDEX idx_portfolio_transacoes_tipo ON public.portfolio_transacoes(tipo);
+CREATE INDEX idx_vi_portfolio_user ON public.vi_portfolio_imoveis(user_id);
+CREATE INDEX idx_vi_portfolio_historico_imovel ON public.vi_portfolio_historico_valores(imovel_id);
+CREATE INDEX idx_vi_portfolio_historico_data ON public.vi_portfolio_historico_valores(data_referencia);
+CREATE INDEX idx_vi_portfolio_transacoes_imovel ON public.vi_portfolio_transacoes(imovel_id);
+CREATE INDEX idx_vi_portfolio_transacoes_tipo ON public.vi_portfolio_transacoes(tipo);
 
 -- Bairros
-CREATE INDEX idx_bairros_bairro ON public.bairros_analytics(bairro);
-CREATE INDEX idx_bairros_score ON public.bairros_analytics(score_bairro DESC);
+CREATE INDEX idx_vi_bairros_bairro ON public.vi_bairros_analytics(bairro);
+CREATE INDEX idx_vi_bairros_score ON public.vi_bairros_analytics(score_bairro DESC);
 
 -- Watchlist
-CREATE INDEX idx_watchlist_user ON public.watchlist(user_id);
-CREATE INDEX idx_watchlist_empreendimento ON public.watchlist(empreendimento_id);
+CREATE INDEX idx_vi_watchlist_user ON public.vi_watchlist(user_id);
+CREATE INDEX idx_vi_watchlist_empreendimento ON public.vi_watchlist(empreendimento_id);
 
 -- Notifications
-CREATE INDEX idx_notifications_user ON public.notifications(user_id);
-CREATE INDEX idx_notifications_unread ON public.notifications(user_id) WHERE read_at IS NULL;
-CREATE INDEX idx_notifications_created ON public.notifications(created_at DESC);
+CREATE INDEX idx_vi_notifications_user ON public.vi_notifications(user_id);
+CREATE INDEX idx_vi_notifications_unread ON public.vi_notifications(user_id) WHERE read_at IS NULL;
+CREATE INDEX idx_vi_notifications_created ON public.vi_notifications(created_at DESC);
 
 -- Subscriptions
-CREATE INDEX idx_subscriptions_user ON public.subscriptions(user_id);
-CREATE INDEX idx_subscriptions_stripe ON public.subscriptions(stripe_subscription_id);
+CREATE INDEX idx_vi_subscriptions_user ON public.vi_subscriptions(user_id);
+CREATE INDEX idx_vi_subscriptions_stripe ON public.vi_subscriptions(stripe_subscription_id);
 
 -- Scores History
-CREATE INDEX idx_scores_history_empreendimento ON public.scores_history(empreendimento_id);
-CREATE INDEX idx_scores_history_calculated ON public.scores_history(calculated_at DESC);
+CREATE INDEX idx_vi_scores_history_empreendimento ON public.vi_scores_history(empreendimento_id);
+CREATE INDEX idx_vi_scores_history_calculated ON public.vi_scores_history(calculated_at DESC);
 
 -- Analytics
-CREATE INDEX idx_analytics_user ON public.analytics(user_id);
-CREATE INDEX idx_analytics_event ON public.analytics(event_type);
-CREATE INDEX idx_analytics_created ON public.analytics(created_at DESC);
-CREATE INDEX idx_analytics_event_data ON public.analytics USING GIN(event_data);
+CREATE INDEX idx_vi_analytics_user ON public.vi_analytics(user_id);
+CREATE INDEX idx_vi_analytics_event ON public.vi_analytics(event_type);
+CREATE INDEX idx_vi_analytics_created ON public.vi_analytics(created_at DESC);
+CREATE INDEX idx_vi_analytics_empreendimento ON public.vi_analytics(empreendimento_id);
+CREATE INDEX idx_vi_analytics_event_data ON public.vi_analytics USING GIN(event_data);
 
 -- JSONB indexes
-CREATE INDEX idx_empreendimentos_fatores_pos ON public.empreendimentos USING GIN(fatores_positivos);
-CREATE INDEX idx_empreendimentos_fatores_neg ON public.empreendimentos USING GIN(fatores_negativos);
+CREATE INDEX idx_vi_empreendimentos_fatores_pos ON public.vi_empreendimentos USING GIN(fatores_positivos);
+CREATE INDEX idx_vi_empreendimentos_fatores_neg ON public.vi_empreendimentos USING GIN(fatores_negativos);
 
 -- ============================================
 -- 3. FUNCTIONS
 -- ============================================
 
 -- Auto-update updated_at
-CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+CREATE OR REPLACE FUNCTION public.vi_update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
   NEW.updated_at = NOW();
@@ -327,10 +329,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Handle new user signup
-CREATE OR REPLACE FUNCTION public.handle_new_user()
+CREATE OR REPLACE FUNCTION public.vi_handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, phone)
+  INSERT INTO public.vi_profiles (id, full_name, phone)
   VALUES (
     NEW.id,
     NEW.raw_user_meta_data ->> 'full_name',
@@ -338,10 +340,11 @@ BEGIN
   );
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = '';
 
 -- Check if user can analyze
-CREATE OR REPLACE FUNCTION public.can_analyze(user_uuid UUID)
+CREATE OR REPLACE FUNCTION public.vi_can_analyze(user_uuid UUID)
 RETURNS BOOLEAN AS $$
 DECLARE
   user_plan TEXT;
@@ -350,7 +353,7 @@ DECLARE
 BEGIN
   SELECT plan, monthly_analyses_count, monthly_analyses_limit
   INTO user_plan, current_count, current_limit
-  FROM public.profiles
+  FROM public.vi_profiles
   WHERE id = user_uuid;
 
   IF user_plan IN ('pro', 'enterprise') THEN
@@ -359,30 +362,33 @@ BEGIN
 
   RETURN current_count < current_limit;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = '';
 
 -- Increment analysis count
-CREATE OR REPLACE FUNCTION public.increment_analysis_count(user_uuid UUID)
+CREATE OR REPLACE FUNCTION public.vi_increment_analysis_count(user_uuid UUID)
 RETURNS VOID AS $$
 BEGIN
-  UPDATE public.profiles
+  UPDATE public.vi_profiles
   SET monthly_analyses_count = monthly_analyses_count + 1
   WHERE id = user_uuid;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = '';
 
 -- Reset monthly analyses (for cron)
-CREATE OR REPLACE FUNCTION public.reset_monthly_analyses()
+CREATE OR REPLACE FUNCTION public.vi_reset_monthly_analyses()
 RETURNS VOID AS $$
 BEGIN
-  UPDATE public.profiles
+  UPDATE public.vi_profiles
   SET monthly_analyses_count = 0,
       last_analysis_reset_at = NOW();
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = '';
 
 -- Create notification helper
-CREATE OR REPLACE FUNCTION public.create_notification(
+CREATE OR REPLACE FUNCTION public.vi_create_notification(
   p_user_id UUID,
   p_type TEXT,
   p_title TEXT,
@@ -395,175 +401,176 @@ RETURNS BIGINT AS $$
 DECLARE
   notification_id BIGINT;
 BEGIN
-  INSERT INTO public.notifications (user_id, type, title, message, action_url, action_label, metadata)
+  INSERT INTO public.vi_notifications (user_id, type, title, message, action_url, action_label, metadata)
   VALUES (p_user_id, p_type, p_title, p_message, p_action_url, p_action_label, p_metadata)
   RETURNING id INTO notification_id;
 
   RETURN notification_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = '';
 
 -- ============================================
 -- 4. TRIGGERS
 -- ============================================
 
-CREATE TRIGGER update_profiles_updated_at
-  BEFORE UPDATE ON public.profiles
-  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+CREATE TRIGGER update_vi_profiles_updated_at
+  BEFORE UPDATE ON public.vi_profiles
+  FOR EACH ROW EXECUTE FUNCTION public.vi_update_updated_at_column();
 
-CREATE TRIGGER update_empreendimentos_updated_at
-  BEFORE UPDATE ON public.empreendimentos
-  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+CREATE TRIGGER update_vi_empreendimentos_updated_at
+  BEFORE UPDATE ON public.vi_empreendimentos
+  FOR EACH ROW EXECUTE FUNCTION public.vi_update_updated_at_column();
 
-CREATE TRIGGER update_portfolio_imoveis_updated_at
-  BEFORE UPDATE ON public.portfolio_imoveis
-  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+CREATE TRIGGER update_vi_portfolio_imoveis_updated_at
+  BEFORE UPDATE ON public.vi_portfolio_imoveis
+  FOR EACH ROW EXECUTE FUNCTION public.vi_update_updated_at_column();
 
-CREATE TRIGGER on_auth_user_created
+CREATE TRIGGER on_auth_user_created_vi
   AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+  FOR EACH ROW EXECUTE FUNCTION public.vi_handle_new_user();
 
 -- ============================================
 -- 5. ROW LEVEL SECURITY
 -- ============================================
 
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.empreendimentos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.enrichment_data ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.portfolio_imoveis ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.portfolio_historico_valores ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.portfolio_transacoes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.bairros_analytics ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.watchlist ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.scores_history ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.analytics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vi_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vi_empreendimentos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vi_enrichment_data ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vi_portfolio_imoveis ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vi_portfolio_historico_valores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vi_portfolio_transacoes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vi_bairros_analytics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vi_watchlist ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vi_notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vi_subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vi_scores_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vi_analytics ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: user can read/update own
-CREATE POLICY "Users can view own profile"
-  ON public.profiles FOR SELECT
-  USING (auth.uid() = id);
+CREATE POLICY "vi: Users can view own profile"
+  ON public.vi_profiles FOR SELECT
+  USING ((select auth.uid()) = id);
 
-CREATE POLICY "Users can update own profile"
-  ON public.profiles FOR UPDATE
-  USING (auth.uid() = id);
+CREATE POLICY "vi: Users can update own profile"
+  ON public.vi_profiles FOR UPDATE
+  USING ((select auth.uid()) = id);
 
 -- Empreendimentos: public visible to all authenticated, premium to subscribers
-CREATE POLICY "Authenticated users can view active empreendimentos"
-  ON public.empreendimentos FOR SELECT
+CREATE POLICY "vi: Authenticated users can view active empreendimentos"
+  ON public.vi_empreendimentos FOR SELECT
   TO authenticated
   USING (status = 'ativo' AND (visibilidade = 'publico' OR EXISTS (
-    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND plan IN ('basico', 'pro', 'enterprise')
+    SELECT 1 FROM public.vi_profiles WHERE id = (select auth.uid()) AND plan IN ('basico', 'pro', 'enterprise')
   )));
 
 -- Enrichment data: accessible with empreendimento
-CREATE POLICY "Authenticated users can view enrichment data"
-  ON public.enrichment_data FOR SELECT
+CREATE POLICY "vi: Authenticated users can view enrichment data"
+  ON public.vi_enrichment_data FOR SELECT
   TO authenticated
   USING (true);
 
 -- Portfolio: user can CRUD own
-CREATE POLICY "Users can view own portfolio"
-  ON public.portfolio_imoveis FOR SELECT
-  USING (auth.uid() = user_id);
+CREATE POLICY "vi: Users can view own portfolio"
+  ON public.vi_portfolio_imoveis FOR SELECT
+  USING ((select auth.uid()) = user_id);
 
-CREATE POLICY "Users can insert own portfolio"
-  ON public.portfolio_imoveis FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "vi: Users can insert own portfolio"
+  ON public.vi_portfolio_imoveis FOR INSERT
+  WITH CHECK ((select auth.uid()) = user_id);
 
-CREATE POLICY "Users can update own portfolio"
-  ON public.portfolio_imoveis FOR UPDATE
-  USING (auth.uid() = user_id);
+CREATE POLICY "vi: Users can update own portfolio"
+  ON public.vi_portfolio_imoveis FOR UPDATE
+  USING ((select auth.uid()) = user_id);
 
-CREATE POLICY "Users can delete own portfolio"
-  ON public.portfolio_imoveis FOR DELETE
-  USING (auth.uid() = user_id);
+CREATE POLICY "vi: Users can delete own portfolio"
+  ON public.vi_portfolio_imoveis FOR DELETE
+  USING ((select auth.uid()) = user_id);
 
 -- Portfolio histórico: via portfolio ownership
-CREATE POLICY "Users can view own portfolio history"
-  ON public.portfolio_historico_valores FOR SELECT
+CREATE POLICY "vi: Users can view own portfolio history"
+  ON public.vi_portfolio_historico_valores FOR SELECT
   USING (EXISTS (
-    SELECT 1 FROM public.portfolio_imoveis WHERE id = imovel_id AND user_id = auth.uid()
+    SELECT 1 FROM public.vi_portfolio_imoveis WHERE id = imovel_id AND user_id = (select auth.uid())
   ));
 
-CREATE POLICY "Users can insert own portfolio history"
-  ON public.portfolio_historico_valores FOR INSERT
+CREATE POLICY "vi: Users can insert own portfolio history"
+  ON public.vi_portfolio_historico_valores FOR INSERT
   WITH CHECK (EXISTS (
-    SELECT 1 FROM public.portfolio_imoveis WHERE id = imovel_id AND user_id = auth.uid()
+    SELECT 1 FROM public.vi_portfolio_imoveis WHERE id = imovel_id AND user_id = (select auth.uid())
   ));
 
 -- Portfolio transacoes: via portfolio ownership
-CREATE POLICY "Users can view own transactions"
-  ON public.portfolio_transacoes FOR SELECT
+CREATE POLICY "vi: Users can view own transactions"
+  ON public.vi_portfolio_transacoes FOR SELECT
   USING (EXISTS (
-    SELECT 1 FROM public.portfolio_imoveis WHERE id = imovel_id AND user_id = auth.uid()
+    SELECT 1 FROM public.vi_portfolio_imoveis WHERE id = imovel_id AND user_id = (select auth.uid())
   ));
 
-CREATE POLICY "Users can insert own transactions"
-  ON public.portfolio_transacoes FOR INSERT
+CREATE POLICY "vi: Users can insert own transactions"
+  ON public.vi_portfolio_transacoes FOR INSERT
   WITH CHECK (EXISTS (
-    SELECT 1 FROM public.portfolio_imoveis WHERE id = imovel_id AND user_id = auth.uid()
+    SELECT 1 FROM public.vi_portfolio_imoveis WHERE id = imovel_id AND user_id = (select auth.uid())
   ));
 
-CREATE POLICY "Users can update own transactions"
-  ON public.portfolio_transacoes FOR UPDATE
+CREATE POLICY "vi: Users can update own transactions"
+  ON public.vi_portfolio_transacoes FOR UPDATE
   USING (EXISTS (
-    SELECT 1 FROM public.portfolio_imoveis WHERE id = imovel_id AND user_id = auth.uid()
+    SELECT 1 FROM public.vi_portfolio_imoveis WHERE id = imovel_id AND user_id = (select auth.uid())
   ));
 
-CREATE POLICY "Users can delete own transactions"
-  ON public.portfolio_transacoes FOR DELETE
+CREATE POLICY "vi: Users can delete own transactions"
+  ON public.vi_portfolio_transacoes FOR DELETE
   USING (EXISTS (
-    SELECT 1 FROM public.portfolio_imoveis WHERE id = imovel_id AND user_id = auth.uid()
+    SELECT 1 FROM public.vi_portfolio_imoveis WHERE id = imovel_id AND user_id = (select auth.uid())
   ));
 
 -- Bairros analytics: public read
-CREATE POLICY "Authenticated users can view bairros analytics"
-  ON public.bairros_analytics FOR SELECT
+CREATE POLICY "vi: Authenticated users can view bairros analytics"
+  ON public.vi_bairros_analytics FOR SELECT
   TO authenticated
   USING (true);
 
 -- Watchlist: user can CRUD own
-CREATE POLICY "Users can view own watchlist"
-  ON public.watchlist FOR SELECT
-  USING (auth.uid() = user_id);
+CREATE POLICY "vi: Users can view own watchlist"
+  ON public.vi_watchlist FOR SELECT
+  USING ((select auth.uid()) = user_id);
 
-CREATE POLICY "Users can insert own watchlist"
-  ON public.watchlist FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "vi: Users can insert own watchlist"
+  ON public.vi_watchlist FOR INSERT
+  WITH CHECK ((select auth.uid()) = user_id);
 
-CREATE POLICY "Users can update own watchlist"
-  ON public.watchlist FOR UPDATE
-  USING (auth.uid() = user_id);
+CREATE POLICY "vi: Users can update own watchlist"
+  ON public.vi_watchlist FOR UPDATE
+  USING ((select auth.uid()) = user_id);
 
-CREATE POLICY "Users can delete own watchlist"
-  ON public.watchlist FOR DELETE
-  USING (auth.uid() = user_id);
+CREATE POLICY "vi: Users can delete own watchlist"
+  ON public.vi_watchlist FOR DELETE
+  USING ((select auth.uid()) = user_id);
 
 -- Notifications: user can read/update own
-CREATE POLICY "Users can view own notifications"
-  ON public.notifications FOR SELECT
-  USING (auth.uid() = user_id);
+CREATE POLICY "vi: Users can view own notifications"
+  ON public.vi_notifications FOR SELECT
+  USING ((select auth.uid()) = user_id);
 
-CREATE POLICY "Users can update own notifications"
-  ON public.notifications FOR UPDATE
-  USING (auth.uid() = user_id);
+CREATE POLICY "vi: Users can update own notifications"
+  ON public.vi_notifications FOR UPDATE
+  USING ((select auth.uid()) = user_id);
 
 -- Subscriptions: user can read own
-CREATE POLICY "Users can view own subscriptions"
-  ON public.subscriptions FOR SELECT
-  USING (auth.uid() = user_id);
+CREATE POLICY "vi: Users can view own subscriptions"
+  ON public.vi_subscriptions FOR SELECT
+  USING ((select auth.uid()) = user_id);
 
 -- Scores history: public read for authenticated
-CREATE POLICY "Authenticated users can view scores history"
-  ON public.scores_history FOR SELECT
+CREATE POLICY "vi: Authenticated users can view scores history"
+  ON public.vi_scores_history FOR SELECT
   TO authenticated
   USING (true);
 
 -- Analytics: insert only (admin reads via service role)
-CREATE POLICY "Authenticated users can insert analytics"
-  ON public.analytics FOR INSERT
+CREATE POLICY "vi: Authenticated users can insert analytics"
+  ON public.vi_analytics FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
@@ -571,7 +578,7 @@ CREATE POLICY "Authenticated users can insert analytics"
 -- 6. VIEWS
 -- ============================================
 
-CREATE OR REPLACE VIEW public.vw_empreendimentos_completos AS
+CREATE OR REPLACE VIEW public.vw_vi_empreendimentos_completos AS
 SELECT
   e.*,
   ed.escolas_1km,
@@ -586,15 +593,15 @@ SELECT
   ed.renda_media_cep,
   ed.crescimento_populacional,
   COALESCE(wc.watchlist_count, 0) AS watchlist_count
-FROM public.empreendimentos e
-LEFT JOIN public.enrichment_data ed ON ed.empreendimento_id = e.id
+FROM public.vi_empreendimentos e
+LEFT JOIN public.vi_enrichment_data ed ON ed.empreendimento_id = e.id
 LEFT JOIN (
   SELECT empreendimento_id, COUNT(*) AS watchlist_count
-  FROM public.watchlist
+  FROM public.vi_watchlist
   GROUP BY empreendimento_id
 ) wc ON wc.empreendimento_id = e.id;
 
-CREATE OR REPLACE VIEW public.vw_user_stats AS
+CREATE OR REPLACE VIEW public.vw_vi_user_stats AS
 SELECT
   p.id AS user_id,
   p.full_name,
@@ -603,23 +610,23 @@ SELECT
   COALESCE(n.unread_count, 0) AS unread_notifications,
   COALESCE(pi.portfolio_count, 0) AS portfolio_count,
   COALESCE(pi.portfolio_value, 0) AS portfolio_total_value
-FROM public.profiles p
+FROM public.vi_profiles p
 LEFT JOIN (
-  SELECT user_id, COUNT(*) AS watchlist_count FROM public.watchlist GROUP BY user_id
+  SELECT user_id, COUNT(*) AS watchlist_count FROM public.vi_watchlist GROUP BY user_id
 ) w ON w.user_id = p.id
 LEFT JOIN (
-  SELECT user_id, COUNT(*) AS unread_count FROM public.notifications WHERE read_at IS NULL GROUP BY user_id
+  SELECT user_id, COUNT(*) AS unread_count FROM public.vi_notifications WHERE read_at IS NULL GROUP BY user_id
 ) n ON n.user_id = p.id
 LEFT JOIN (
   SELECT user_id, COUNT(*) AS portfolio_count, SUM(valor_atual_estimado) AS portfolio_value
-  FROM public.portfolio_imoveis GROUP BY user_id
+  FROM public.vi_portfolio_imoveis GROUP BY user_id
 ) pi ON pi.user_id = p.id;
 
 -- ============================================
 -- 7. SEED DATA (15 empreendimentos em Fortaleza)
 -- ============================================
 
-INSERT INTO public.empreendimentos (nome, slug, endereco, bairro, cidade, estado, lat, lng, construtora, preco, metragem, preco_m2, quartos, suites, vagas, entrega_prevista, score, valorizacao_min, valorizacao_max, confianca, recomendacao, status, imagem_principal) VALUES
+INSERT INTO public.vi_empreendimentos (nome, slug, endereco, bairro, cidade, estado, lat, lng, construtora, preco, metragem, preco_m2, quartos, suites, vagas, entrega_prevista, score, valorizacao_min, valorizacao_max, confianca, recomendacao, status, imagem_principal) VALUES
 ('Residencial Atlântico Prime', 'residencial-atlantico-prime', 'Rua Silva Jatahy, 600', 'Meireles', 'Fortaleza', 'CE', -3.7245, -38.5100, 'MRV Engenharia', 580000, 95, 6105, 3, 2, 2, '2027-06-01', 87, 32, 45, 'alta', 'COMPRAR', 'ativo', '/placeholder-imovel.jpg'),
 ('Condomínio Vivace', 'condominio-vivace', 'Av. Eng. Santana Jr, 1200', 'Cocó', 'Fortaleza', 'CE', -3.7430, -38.4870, 'Diagonal Engenharia', 385000, 68, 5662, 2, 1, 1, '2027-03-01', 91, 38, 52, 'alta', 'COMPRAR', 'ativo', '/placeholder-imovel.jpg'),
 ('BS Design 10', 'bs-design-10', 'Rua Desembargador Leite Albuquerque, 100', 'Aldeota', 'Fortaleza', 'CE', -3.7320, -38.5180, 'BSPar', 620000, 82, 7561, 3, 1, 2, '2026-12-01', 62, 10, 18, 'media', 'ANALISAR', 'ativo', '/placeholder-imovel.jpg'),
@@ -637,7 +644,7 @@ INSERT INTO public.empreendimentos (nome, slug, endereco, bairro, cidade, estado
 ('Praia Formosa Residence', 'praia-formosa-residence', 'Av. Historiador Raimundo Girão, 800', 'Praia de Iracema', 'Fortaleza', 'CE', -3.7210, -38.5140, 'Bspar', 550000, 88, 6250, 3, 2, 2, '2027-10-01', 45, 5, 12, 'baixa', 'EVITAR', 'ativo', '/placeholder-imovel.jpg');
 
 -- Enrichment data for each empreendimento
-INSERT INTO public.enrichment_data (empreendimento_id, escolas_1km, hospitais_1km, supermercados_1km, farmacias_1km, metro_distancia, metro_linha, shopping_distancia, shopping_nome, concorrentes_bairro, preco_medio_bairro, preco_vs_bairro, saturacao_score, renda_media_cep, populacao_bairro, crescimento_populacional) VALUES
+INSERT INTO public.vi_enrichment_data (empreendimento_id, escolas_1km, hospitais_1km, supermercados_1km, farmacias_1km, metro_distancia, metro_linha, shopping_distancia, shopping_nome, concorrentes_bairro, preco_medio_bairro, preco_vs_bairro, saturacao_score, renda_media_cep, populacao_bairro, crescimento_populacional) VALUES
 (1, 12, 3, 5, 8, 800, 'Linha Leste', 500, 'Shopping Aldeota', 5, 6200, -1.5, 45, 8500, 42000, 3.2),
 (2, 8, 2, 4, 6, 380, 'Linha Sul', 1200, 'Shopping RioMar', 2, 5800, -2.4, 20, 7200, 38000, 5.8),
 (3, 15, 4, 6, 10, 1200, 'Linha Leste', 300, 'Shopping Aldeota', 8, 7800, -3.1, 72, 9500, 55000, 1.2),
@@ -655,7 +662,7 @@ INSERT INTO public.enrichment_data (empreendimento_id, escolas_1km, hospitais_1k
 (15, 10, 2, 4, 7, 2000, NULL, 900, 'Shopping Praia de Iracema', 7, 6300, -0.8, 65, 7000, 40000, 0.8);
 
 -- Bairros analytics
-INSERT INTO public.bairros_analytics (bairro, cidade, preco_medio_m2, variacao_mensal, variacao_anual, lancamentos_ativos, lancamentos_pipeline_6m, saturacao_score, renda_media, crescimento_renda, populacao, score_bairro, tendencia, recomendacao_acao, data_referencia) VALUES
+INSERT INTO public.vi_bairros_analytics (bairro, cidade, preco_medio_m2, variacao_mensal, variacao_anual, lancamentos_ativos, lancamentos_pipeline_6m, saturacao_score, renda_media, crescimento_renda, populacao, score_bairro, tendencia, recomendacao_acao, data_referencia) VALUES
 ('Meireles', 'Fortaleza', 6200, 1.2, 14.5, 5, 2, 45, 8500, 6.2, 42000, 72, 'estavel', 'MANTER', '2026-03-01'),
 ('Cocó', 'Fortaleza', 5800, 2.1, 22.8, 2, 3, 20, 7200, 8.5, 38000, 88, 'subindo', 'AUMENTAR', '2026-03-01'),
 ('Aldeota', 'Fortaleza', 7800, 0.3, 5.2, 8, 3, 72, 9500, 3.1, 55000, 55, 'caindo', 'REDUZIR', '2026-03-01'),

@@ -108,7 +108,7 @@ export async function updateProfile(formData: FormData) {
   }
 
   const { error } = await supabase
-    .from('profiles')
+    .from('vi_profiles')
     .update({
       full_name: formData.get('fullName') as string,
       phone: formData.get('phone') as string,

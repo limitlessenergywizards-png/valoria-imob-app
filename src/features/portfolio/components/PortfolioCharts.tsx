@@ -15,8 +15,7 @@ interface DistribuicaoData {
   valor: number
 }
 
-export const PortfolioCharts = {
-  Evolucao: function EvolucaoChart({ data }: { data: EvolucaoData[] }) {
+export function EvolucaoChart({ data }: { data: EvolucaoData[] }) {
     return (
       <Card>
         <CardHeader>
@@ -42,9 +41,9 @@ export const PortfolioCharts = {
         </CardContent>
       </Card>
     )
-  },
+}
 
-  Distribuicao: function DistribuicaoChart({ data }: { data: DistribuicaoData[] }) {
+export function DistribuicaoChart({ data }: { data: DistribuicaoData[] }) {
     return (
       <Card>
         <CardHeader>
@@ -72,5 +71,4 @@ export const PortfolioCharts = {
         </CardContent>
       </Card>
     )
-  },
 }

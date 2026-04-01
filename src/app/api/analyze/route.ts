@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
 
     // Check analysis limit
     const { data: profile } = await supabase
-      .from('profiles')
+      .from('vi_profiles')
       .select('monthly_analyses_count, monthly_analyses_limit, plan')
       .eq('id', user.id)
       .single()
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Fetch empreendimento data
     const { data: empreendimento } = await supabase
-      .from('empreendimentos')
+      .from('vi_empreendimentos')
       .select('*')
       .eq('id', empreendimentoId)
       .single()
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     // Fetch enrichment data
     const { data: enrichmentData } = await supabase
-      .from('enrichment_data')
+      .from('vi_enrichment_data')
       .select('*')
       .eq('empreendimento_id', empreendimentoId)
       .single()
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     // Save result
     await supabase
-      .from('empreendimentos')
+      .from('vi_empreendimentos')
       .update({
         score: result.score,
         valorizacao_min: result.valorizacao_min,
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       .eq('id', empreendimentoId)
 
     // Save history
-    await supabase.from('scores_history').insert({
+    await supabase.from('vi_scores_history').insert({
       empreendimento_id: empreendimentoId,
       score: result.score,
       valorizacao_min: result.valorizacao_min,
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Increment counter
-    await supabase.rpc('increment_analysis_count', { user_uuid: user.id })
+    await supabase.rpc('vi_increment_analysis_count', { user_uuid: user.id })
 
     return NextResponse.json(result)
   } catch (error) {

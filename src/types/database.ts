@@ -12,7 +12,7 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      profiles: {
+      vi_profiles: {
         Row: {
           id: string
           full_name: string | null
@@ -74,7 +74,7 @@ export interface Database {
         }
         Relationships: []
       }
-      empreendimentos: {
+      vi_empreendimentos: {
         Row: {
           id: number
           nome: string
@@ -178,7 +178,7 @@ export interface Database {
         }
         Relationships: []
       }
-      enrichment_data: {
+      vi_enrichment_data: {
         Row: {
           id: number
           empreendimento_id: number
@@ -233,7 +233,7 @@ export interface Database {
         }
         Relationships: []
       }
-      portfolio_imoveis: {
+      vi_portfolio_imoveis: {
         Row: {
           id: number
           user_id: string
@@ -337,7 +337,7 @@ export interface Database {
         }
         Relationships: []
       }
-      portfolio_historico_valores: {
+      vi_portfolio_historico_valores: {
         Row: {
           id: number
           imovel_id: number
@@ -370,7 +370,7 @@ export interface Database {
         }
         Relationships: []
       }
-      portfolio_transacoes: {
+      vi_portfolio_transacoes: {
         Row: {
           id: number
           imovel_id: number
@@ -403,7 +403,7 @@ export interface Database {
         }
         Relationships: []
       }
-      bairros_analytics: {
+      vi_bairros_analytics: {
         Row: {
           id: number
           bairro: string
@@ -460,7 +460,7 @@ export interface Database {
         }
         Relationships: []
       }
-      watchlist: {
+      vi_watchlist: {
         Row: {
           id: number
           user_id: string
@@ -493,7 +493,7 @@ export interface Database {
         }
         Relationships: []
       }
-      notifications: {
+      vi_notifications: {
         Row: {
           id: number
           user_id: string
@@ -533,7 +533,7 @@ export interface Database {
         }
         Relationships: []
       }
-      subscriptions: {
+      vi_subscriptions: {
         Row: {
           id: number
           user_id: string
@@ -587,7 +587,7 @@ export interface Database {
         }
         Relationships: []
       }
-      scores_history: {
+      vi_scores_history: {
         Row: {
           id: number
           empreendimento_id: number
@@ -627,7 +627,7 @@ export interface Database {
         }
         Relationships: []
       }
-      analytics: {
+      vi_analytics: {
         Row: {
           id: number
           user_id: string | null
@@ -671,15 +671,15 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      can_analyze: {
+      vi_can_analyze: {
         Args: { user_uuid: string }
         Returns: boolean
       }
-      increment_analysis_count: {
+      vi_increment_analysis_count: {
         Args: { user_uuid: string }
         Returns: void
       }
-      reset_monthly_analyses: {
+      vi_reset_monthly_analyses: {
         Args: Record<string, never>
         Returns: void
       }

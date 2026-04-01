@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PortfolioKPIs } from '@/features/portfolio/components/PortfolioKPIs'
-import { PortfolioCharts } from '@/features/portfolio/components/PortfolioCharts'
+import { EvolucaoChart, DistribuicaoChart } from '@/features/portfolio/components/PortfolioCharts'
 import { PortfolioList } from '@/features/portfolio/components/PortfolioList'
 import { AddImovelButton } from '@/features/portfolio/components/AddImovelButton'
 
@@ -28,8 +28,8 @@ export default function PortfolioPage() {
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <PortfolioCharts.Evolucao data={[]} />
-          <PortfolioCharts.Distribuicao data={[]} />
+          <EvolucaoChart data={[]} />
+          <DistribuicaoChart data={[]} />
         </div>
 
         <PortfolioList imoveis={[]} />

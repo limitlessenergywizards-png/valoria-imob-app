@@ -21,7 +21,7 @@ export function useAuth() {
 
         if (session?.user) {
           const { data } = await supabase
-            .from('profiles')
+            .from('vi_profiles')
             .select('*')
             .eq('id', session.user.id)
             .single()
